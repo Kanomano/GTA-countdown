@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#190d2c">
+  <meta name="description" content="A neon-soaked countdown to Grand Theft Auto VI, arriving November 19, 2026.">
+  <title>GTA VI — The Countdown</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #fff5ed;
+      --muted: #f5c5ce;
+      --pink: #ff4f9a;
+      --gold: #ffd273;
+      --violet: #21113b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100svh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background: #190d2c;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .scene {
+      position: relative;
+      isolation: isolate;
+      display: grid;
+      min-height: 100svh;
+      place-items: center;
+      overflow: hidden;
+      padding: 3rem 1.25rem;
+      background:
+        radial-gradient(ellipse at 50% 48%, rgb(255 105 145 / 35%), transparent 38%),
+        linear-gradient(180deg, #21113b 0%, #63305e 37%, #e35b76 70%, #ffad79 100%);
+    }
+
+    .scene::before {
+      position: absolute;
+      z-index: -2;
+      top: 20%;
+      left: 50%;
+      width: min(64vw, 36rem);
+      aspect-ratio: 1;
+      content: "";
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ffe2a1, #ff9a86 75%);
+      box-shadow: 0 0 100px rgb(255 150 151 / 32%);
+      -webkit-mask-image: repeating-linear-gradient(to bottom, #000 0 9%, transparent 9% 12%);
+      mask-image: repeating-linear-gradient(to bottom, #000 0 9%, transparent 9% 12%);
+    }
+
+    .scene::after {
+      position: absolute;
+      z-index: -1;
+      right: -10%;
+      bottom: -28%;
+      left: -10%;
+      height: 45%;
+      content: "";
+      background: linear-gradient(180deg, #38183e, #190d2c);
+      clip-path: polygon(0 25%, 12% 18%, 22% 30%, 34% 15%, 48% 27%, 63% 10%, 77% 25%, 90% 12%, 100% 23%, 100% 100%, 0 100%);
+    }
+
+    .card {
+      width: min(100%, 56rem);
+      padding: clamp(1.5rem, 5vw, 4rem);
+      text-align: center;
+      border: 1px solid rgb(255 245 237 / 26%);
+      border-radius: 1.5rem;
+      background: rgb(30 12 44 / 64%);
+      box-shadow: 0 24px 100px rgb(32 9 40 / 35%);
+      backdrop-filter: blur(12px);
+    }
+
+    .eyebrow {
+      margin: 0 0 1rem;
+      color: var(--gold);
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: #fff9f6;
+      font-size: clamp(3rem, 12vw, 7.5rem);
+      font-weight: 1000;
+      letter-spacing: -.09em;
+      line-height: .9;
+      text-shadow: 4px 5px 0 #f0448a, 8px 10px 0 rgb(91 32 94 / 70%);
+    }
+
+    h1 span {
+      display: block;
+      margin-top: .22em;
+      color: var(--gold);
+      font-size: .34em;
+      letter-spacing: .24em;
+      text-shadow: 2px 3px 0 #e24c83;
+    }
+
+    .subtitle {
+      margin: 1.75rem 0 2rem;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+    }
+
+    .timer {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: clamp(.5rem, 2vw, 1rem);
+      max-width: 42rem;
+      margin: 0 auto;
+    }
+
+    .unit {
+      padding: clamp(.8rem, 2vw, 1.25rem) .35rem;
+      border: 1px solid rgb(255 255 255 / 18%);
+      border-radius: .9rem;
+      background: rgb(255 255 255 / 8%);
+    }
+
+    .value {
+      display: block;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(1.8rem, 7vw, 3.75rem);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .label {
+      display: block;
+      margin-top: .65rem;
+      color: var(--muted);
+      font-size: clamp(.58rem, 1.6vw, .75rem);
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .release, .credit {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .release { margin: 1.75rem 0 0; }
+    .release strong { color: var(--ink); }
+    .credit { margin: 1rem 0 0; opacity: .8; }
+
+    @media (max-width: 420px) {
+      .timer { gap: .4rem; }
+      .unit { border-radius: .65rem; }
+      .label { letter-spacing: .08em; }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .card { animation: rise-in .8s cubic-bezier(.2,.8,.2,1) both; }
+      @keyframes rise-in {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="scene">
+    <section class="card" aria-labelledby="title">
+      <p class="eyebrow">Vice City is calling</p>
+      <h1 id="title">GTA <span>VI</span></h1>
+      <p class="subtitle">The wait is almost over.</p>
+
+      <div class="timer" role="timer" aria-label="Countdown to November 19, 2026">
+        <div class="unit"><span class="value" id="days">—</span><span class="label">Days</span></div>
+        <div class="unit"><span class="value" id="hours">—</span><span class="label">Hours</span></div>
+        <div class="unit"><span class="value" id="minutes">—</span><span class="label">Minutes</span></div>
+        <div class="unit"><span class="value" id="seconds">—</span><span class="label">Seconds</span></div>
+      </div>
+
+      <p class="release" id="status">Until <strong>November 19, 2026</strong> · local time</p>
+      <p class="credit">Fan-made countdown · Coded with AI</p>
+    </section>
+  </main>
+
+  <script>
+    const releaseDate = new Date(2026, 10, 19, 0, 0, 0);
+    const fields = {
+      days: document.getElementById('days'),
+      hours: document.getElementById('hours'),
+      minutes: document.getElementById('minutes'),
+      seconds: document.getElementById('seconds')
+    };
+    const status = document.getElementById('status');
+
+    function updateCountdown() {
+      const remaining = releaseDate.getTime() - Date.now();
+      if (remaining <= 0) {
+        Object.values(fields).forEach((field) => { field.textContent = '00'; });
+        status.innerHTML = '<strong>It’s launch day!</strong> Have fun in Vice City.';
+        return;
+      }
+
+      const totalSeconds = Math.floor(remaining / 1000);
+      fields.days.textContent = String(Math.floor(totalSeconds / 86400)).padStart(2, '0');
+      fields.hours.textContent = String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, '0');
+      fields.minutes.textContent = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      fields.seconds.textContent = String(totalSeconds % 60).padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>
