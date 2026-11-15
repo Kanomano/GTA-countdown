@@ -146,12 +146,42 @@
       text-transform: uppercase;
     }
 
+    .timezone-picker {
+      display: grid;
+      justify-items: center;
+      gap: .55rem;
+      margin: 1.5rem auto 0;
+    }
+
+    .timezone-picker label {
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .timezone-picker select {
+      width: min(100%, 22rem);
+      padding: .7rem 2.5rem .7rem .9rem;
+      color: var(--ink);
+      font: inherit;
+      border: 1px solid rgb(255 255 255 / 30%);
+      border-radius: .65rem;
+      background: #301844;
+    }
+
+    .timezone-picker select:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+    }
+
     .release, .credit {
       color: var(--muted);
       font-size: .85rem;
     }
 
-    .release { margin: 1.75rem 0 0; }
+    .release { margin: 1.25rem 0 0; }
     .release strong { color: var(--ink); }
     .credit { margin: 1rem 0 0; opacity: .8; }
 
@@ -184,13 +214,18 @@
         <div class="unit"><span class="value" id="seconds">—</span><span class="label">Seconds</span></div>
       </div>
 
-      <p class="release" id="status">Until <strong>November 19, 2026</strong> · local time</p>
+      <div class="timezone-picker">
+        <label for="timezone">Countdown timezone</label>
+        <select id="timezone" name="timezone"></select>
+      </div>
+
+      <p class="release" id="status" aria-live="polite"></p>
       <p class="credit">Fan-made countdown · Coded with AI</p>
     </section>
   </main>
 
   <script>
-    const releaseDate = new Date(2026, 10, 19, 0, 0, 0);
+    const release = { year: 2026, month: 11, day: 19 };
     const fields = {
       days: document.getElementById('days'),
       hours: document.getElementById('hours'),
@@ -198,12 +233,89 @@
       seconds: document.getElementById('seconds')
     };
     const status = document.getElementById('status');
+    const timezoneSelect = document.getElementById('timezone');
+    const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    function getTimeZones() {
+      if (typeof Intl.supportedValuesOf === 'function') {
+        return Intl.supportedValuesOf('timeZone');
+      }
+      return [
+        'Africa/Cairo', 'America/Chicago', 'America/Los_Angeles', 'America/New_York',
+        'America/Sao_Paulo', 'Asia/Dubai', 'Asia/Hong_Kong', 'Asia/Kolkata',
+        'Asia/Tokyo', 'Australia/Sydney', 'Europe/Berlin', 'Europe/London',
+        'Pacific/Auckland'
+      ];
+    }
+
+    const zones = getTimeZones();
+    timezoneSelect.add(new Option(`Local time (${localTimeZone || 'your device'})`, 'local'));
+    zones.forEach((zone) => timezoneSelect.add(new Option(zone.replaceAll('_', ' '), zone)));
+
+    let savedTimeZone = null;
+    try {
+      savedTimeZone = localStorage.getItem('gta-countdown-timezone');
+    } catch {
+      // Continue with the device's local timezone when storage is unavailable.
+    }
+    if (savedTimeZone === 'local' || zones.includes(savedTimeZone)) {
+      timezoneSelect.value = savedTimeZone;
+    }
+
+    function getReleaseTimestamp(timeZone) {
+      if (timeZone === 'local') {
+        return new Date(release.year, release.month - 1, release.day, 0, 0, 0).getTime();
+      }
+
+      const targetAsUtc = Date.UTC(release.year, release.month - 1, release.day);
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23'
+      });
+      let timestamp = targetAsUtc;
+
+      // Adjust the UTC guess until it represents midnight in the selected zone.
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        const parts = Object.fromEntries(formatter.formatToParts(new Date(timestamp))
+          .filter(({ type }) => type !== 'literal')
+          .map(({ type, value }) => [type, Number(value)]));
+        const representedAsUtc = Date.UTC(
+          parts.year, parts.month - 1, parts.day,
+          parts.hour, parts.minute, parts.second
+        );
+        const adjustment = targetAsUtc - representedAsUtc;
+        timestamp += adjustment;
+        if (adjustment === 0) break;
+      }
+      return timestamp;
+    }
+
+    function updateStatus(timeZone, releaseTimestamp) {
+      const effectiveZone = timeZone === 'local' ? localTimeZone : timeZone;
+      const zoneName = effectiveZone
+        ? new Intl.DateTimeFormat(undefined, {
+            timeZone: effectiveZone,
+            timeZoneName: 'long'
+          }).formatToParts(new Date(releaseTimestamp)).find(({ type }) => type === 'timeZoneName')?.value
+        : 'local time';
+      status.textContent = `Until November 19, 2026 at 12:00 AM · ${zoneName || effectiveZone || 'local time'}`;
+    }
 
     function updateCountdown() {
-      const remaining = releaseDate.getTime() - Date.now();
+      const timeZone = timezoneSelect.value || 'local';
+      const releaseTimestamp = getReleaseTimestamp(timeZone);
+      const remaining = releaseTimestamp - Date.now();
+      updateStatus(timeZone, releaseTimestamp);
+
       if (remaining <= 0) {
         Object.values(fields).forEach((field) => { field.textContent = '00'; });
-        status.innerHTML = '<strong>It’s launch day!</strong> Have fun in Vice City.';
+        status.textContent = 'It’s launch day! Have fun in Vice City.';
         return;
       }
 
@@ -213,6 +325,15 @@
       fields.minutes.textContent = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
       fields.seconds.textContent = String(totalSeconds % 60).padStart(2, '0');
     }
+
+    timezoneSelect.addEventListener('change', () => {
+      try {
+        localStorage.setItem('gta-countdown-timezone', timezoneSelect.value);
+      } catch {
+        // The selection still works for this page view when storage is unavailable.
+      }
+      updateCountdown();
+    });
 
     updateCountdown();
     setInterval(updateCountdown, 1000);
